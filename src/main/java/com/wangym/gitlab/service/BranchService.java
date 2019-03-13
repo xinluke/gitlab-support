@@ -41,19 +41,17 @@ public class BranchService {
                     .flatMap(List::stream)
                     .collect(Collectors.toList());
             for (Project p : projects) {
+                log.info("开始查询项目分支信息，group：{},project：{}", p.getNamespace().getFullPath(), p.getName());
                 Integer projectId = p.getId();
                 List<Branch> branchs = repositoryApi.getBranches(projectId).stream()
                         // 已经合并入master的分支可以考虑去删除
                         .filter(Branch::getMerged)
                         // 过滤出不是想要保留的分支
                         .filter(it -> !protectBranch.contains(it.getName()))
-                        // .filter(branch
-                        // ->branch.getName().startsWith("feature/2018"))
                         .collect(Collectors.toList());
                 for (Branch branch : branchs) {
                     String branchName = branch.getName();
-                    log.info("result:{},{},{},{}", p.getNamespace().getFullPath(), p.getName(), branchName,
-                            branch.getMerged());
+                    log.info("[当前分支已合并进入master]:{},{},{}", p.getName(), branchName, branch.getMerged());
                     // repositoryApi.deleteBranch(projectId, branchName);
                 }
 
